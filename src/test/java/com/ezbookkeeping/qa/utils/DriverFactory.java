@@ -10,6 +10,7 @@ import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+import java.util.Map;
 
 public final class DriverFactory {
 
@@ -27,6 +28,7 @@ public final class DriverFactory {
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
+        options.setExperimentalOption("prefs", Map.of("intl.accept_languages", "pt-BR,pt,en-US"));
         return new ChromeDriver(options);
     }
 
