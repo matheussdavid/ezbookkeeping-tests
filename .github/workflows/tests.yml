@@ -46,7 +46,7 @@ jobs:
 
       - name: Start ezBookKeeping
         run: |
-          docker compose up -d
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d
           echo "Aguardando aplicação..."
           for i in $(seq 1 30); do
             if curl -sf http://localhost:8080 > /dev/null 2>&1; then
@@ -56,6 +56,7 @@ jobs:
             sleep 2
           done
           echo "Aplicação não respondeu a tempo"
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail 40
           exit 1
 
       - name: Run tests
@@ -71,4 +72,4 @@ jobs:
 
       - name: Shutdown
         if: always()
-        run: docker compose down -v
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml down -v

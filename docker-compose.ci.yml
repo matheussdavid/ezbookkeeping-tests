@@ -1,0 +1,7 @@
+services:
+  ezbookkeeping:
+    volumes:
+      - ezbookkeeping-data:/ezbookkeeping/data
+
+volumes:
+  ezbookkeeping-data:
