@@ -59,6 +59,21 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --tail 40
           exit 1
 
+      - name: Seed test user
+        run: |
+          curl -sf -X POST http://localhost:8080/api/register.json \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "username":"tester",
+              "password":"senha1234",
+              "email":"qa@teste.com",
+              "nickname":"Tester",
+              "language":"pt_BR",
+              "defaultCurrency":"BRL",
+              "firstDayOfWeek":1,
+              "categories":[{"name":"Transporte","type":2,"icon":"201","iconType":0,"color":"FF0000","comment":"","subCategories":[]}]
+            }' > /dev/null && echo "usuário criado" || echo "usuário já existia (ok)"
+
       - name: Run tests
         run: ${{ matrix.suite.cmds }}
 
