@@ -1,0 +1,74 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  BASE_URL: http://localhost:8080
+  UI_URL: http://localhost:8080
+  USER_USERNAME: tester
+  USER_PASSWORD: senha1234
+  USER_EMAIL: qa@teste.com
+  DEFAULT_CURRENCY: BRL
+  DEFAULT_LANGUAGE: pt_BR
+
+jobs:
+  test:
+    name: ${{ matrix.suite.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite:
+          - name: api
+            artifact: api
+            cmds: |
+              mvn clean test -Psmoke -Papi --batch-mode
+              mvn clean test -Papi --batch-mode
+          - name: ui
+            artifact: ui
+            cmds: mvn clean test -Pui --batch-mode
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Start ezBookKeeping
+        run: |
+          docker compose up -d
+          echo "Aguardando aplicação..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080 > /dev/null 2>&1; then
+              echo "Aplicação pronta!"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Aplicação não respondeu a tempo"
+          exit 1
+
+      - name: Run tests
+        run: ${{ matrix.suite.cmds }}
+
+      - name: Upload Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.suite.artifact }}
+          path: target/surefire-reports/
+          retention-days: 14
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down -v

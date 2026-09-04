@@ -1,0 +1,33 @@
+# Build
+target/
+
+# OpenCode config (local)
+.opencode/
+
+# Reports (gerados)
+reports/
+
+# Dados locais (SQLite persistente via docker volume)
+data/
+
+# Environment
+.env
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Logs
+*.log

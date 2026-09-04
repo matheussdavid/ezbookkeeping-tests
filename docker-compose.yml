@@ -1,0 +1,9 @@
+services:
+  ezbookkeeping:
+    image: mayswind/ezbookkeeping:latest
+    container_name: ezbookkeeping
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/ezbookkeeping/data   # persiste o SQLite na sua máquina
+    restart: unless-stopped
