@@ -20,8 +20,7 @@
         <junit.version>5.11.4</junit.version>
         <assertj.version>3.27.7</assertj.version>
         <jackson.version>2.22.1</jackson.version>
-        <selenium.version>4.27.0</selenium.version>
-        <webdrivermanager.version>5.9.2</webdrivermanager.version>
+        <selenium.version>4.47.0</selenium.version>
         <extentreports.version>5.1.1</extentreports.version>
         <dotenv.version>2.3.2</dotenv.version>
     </properties>
@@ -64,12 +63,6 @@
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>${webdrivermanager.version}</version>
             <scope>test</scope>
         </dependency>
 

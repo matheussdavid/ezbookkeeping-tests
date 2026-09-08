@@ -1,7 +1,6 @@
 package com.ezbookkeeping.qa.utils;
 
 import com.ezbookkeeping.qa.config.AppConfig;
-import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -20,7 +19,6 @@ public final class DriverFactory {
     }
 
     public static WebDriver createChrome() {
-        WebDriverManager.chromedriver().setup();
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--lang=pt-BR");
         options.addArguments("--headless=new");
@@ -33,7 +31,6 @@ public final class DriverFactory {
     }
 
     public static WebDriver createFirefox() {
-        WebDriverManager.firefoxdriver().setup();
         FirefoxOptions options = new FirefoxOptions();
         options.addArguments("--headless");
         options.addArguments("--no-sandbox");

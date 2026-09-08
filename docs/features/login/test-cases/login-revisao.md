@@ -45,5 +45,5 @@ Nenhuma. Todas as prioridades estao coerentes com os tipos de cenario:
 ## Observacoes
 1. **Cobertura completa:** Todos os 18 CAs (10 API + 8 UI) e todas as 17 regras de negocio (11 API + 6 UI) estao cobertos.
 2. **Regra #10 (API) — last_login_unix_time:** CT-001 cobre login bem-sucedido, mas nao verifica explicitamente a atualizacao do timestamp. [SUPOSICAO] Assume-se que a atualizacao happen internamente no servidor e nao e verificavel via API de login. Se necessario, criar CT especifico apos login usando endpoint de perfil para verificar `last_login_unix_time`.
-3. **CTs de configuracao:** CT-006 (email nao verificado), CT-008 (senha desabilitada) e CT-009 (rate limiting) dependem de configuracao especifica do ambiente. Podem nao ser executaveis em todos os ambientes.
-4. **CT-010 (UI) — links:** Classificado como P3 porque e funcionalidade opcional (depende de `isUserRegistrationEnabled()` e configuracao de recuperacao de senha).
+3. **CTs de configuracao:** API CT-006 (email nao verificado), CT-008 (senha desabilitada) e CT-009 (rate limiting) dependem de configuracao especifica do ambiente. UI CT-010 (email nao verificado) tambem nao executavel — mantido como `@Disabled` no `LoginUiTest`.
+4. **UI links:** ex-`CT-010` (links) dividido em CT-008 ("Forget Password?") e CT-009 ("Create an account"). 2FA (ex-`CT-007`/CA-07) removido do escopo — nao sera testado. Email nao verificado movido para CT-010 (ultimo).
