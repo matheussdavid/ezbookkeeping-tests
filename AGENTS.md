@@ -17,10 +17,11 @@ mvn clean test                 # run all
 ## Comandos de teste
 
 ```bash
-mvn clean test -Psmoke    # smoke (API + UI+tag smoke)
-mvn clean test -Papi      # apenas API
-mvn clean test -Pui       # apenas UI
-mvn clean test -Pe2e      # apenas E2E
+mvn clean test -Psmoke         # smoke (API + UI+tag smoke)
+mvn clean test -Papi           # apenas API
+mvn clean test -Pui            # apenas UI
+mvn clean test -Pe2e           # apenas E2E
+mvn clean test -Prate-limit    # apenas rate-limit (isolado)
 ```
 
 Profiles usam JUnit 5 tags. Test classes devem ter `@Tag("api")`, `@Tag("ui")`, `@Tag("e2e")` e opcionalmente `@Tag("smoke")`.
@@ -28,32 +29,47 @@ Profiles usam JUnit 5 tags. Test classes devem ter `@Tag("api")`, `@Tag("ui")`, 
 ## Configuração (.env)
 
 `AppConfig` carrega em ordem: **System env > .env > hardcoded defaults**.
-Campos: `BASE_URL`, `UI_URL`, `USER_USERNAME`, `USER_PASSWORD`, `USER_EMAIL`, `DEFAULT_CURRENCY`, `DEFAULT_LANGUAGE`.
+Campos: `BASE_URL`, `UI_URL`, `USER_USERNAME`, `USER_PASSWORD`, `USER_EMAIL`, `DEFAULT_CURRENCY`, `DEFAULT_LANGUAGE`, `DEFAULT_TIMEZONE`, `RATE_LIMIT_USERNAME`, `RATE_LIMIT_PASSWORD`, `REPORT_DIR`.
 
 ## Paralelismo
 
 JUnit 5 roda em **modo paralelo por classe** (`per_class` lifecycle). Testes devem ser independentes — sem estado compartilhado entre classes.
 
+## Rate limit (isolamento)
+
+O bloqueio do ezBookKeeping é **por IP**, não por usuário. O `LoginRateLimitTest` usa usuário dedicado + `@Execution(SAME_THREAD)`, mas por queimar o IP de localhost ele **nunca roda em runs padrão**: o surefire exclui a tag `rate-limit` por default (`surefire.excludedGroups=rate-limit`). Rode sempre isolado:
+
+```bash
+mvn clean test -Prate-limit
+```
+
 ## Estrutura
 
+O framework vive em `src/main` e os casos de teste em `src/test`.
+
 ```
-src/test/java/com/ezbookkeeping/qa/
+src/main/java/com/ezbookkeeping/qa/
 ├── config/AppConfig.java          # config via .env
+├── core/TestBase.java             # base: RestAssured setup + auto-login/registro
 ├── api/
-│   ├── client/AuthClient.java     # login/register
+│   ├── client/                    # ClientBase, AuthClient
 │   └── model/                     # DTOs (AuthResponse, ApiResponse)
-├── tests/
-│   ├── TestBase.java              # base: RestAssured setup + auto-login/registro
-│   ├── api/                       # testes de API
-│   ├── ui/                        # testes de UI
-│   └── e2e/                       # testes E2E
-├── utils/                         # MoneyUtils, DriverFactory, Screenshot
-└── data/                          # dados de teste
+├── ui/
+│   ├── driver/DriverFactory.java  # Chrome/Firefox
+│   └── pages/BasePage.java, LoginPage.java   # Page Objects
+├── utils/                         # MoneyUtils (puro), MoneyAssertions, Screenshot
+└── fixtures/TestUsers.java        # usuários de teste
+
+src/test/java/com/ezbookkeeping/qa/tests/
+├── api/                           # testes de API
+├── ui/                            # testes de UI
+└── e2e/                           # testes E2E (futuro)
 ```
 
-## TestBase
+## Bases
 
-Herde `TestBase` em todos os testes. Ele configura `RestAssured.baseURI` e `authentication` (Bearer token) em `@BeforeAll`. Tenta login; se falhar, registra o usuário automaticamente. O token é compartilhado via `RestAssured.oauth2(token)`.
+- **`TestBase`** (API): herde nos testes de API. Configura `RestAssured.baseURI`, parser e `authentication` (Bearer token) em `@BeforeAll` sincronizado (safe com paralelismo por classe). Tenta login; se falhar, registra o usuário automaticamente. O token é compartilhado via `RestAssured.oauth2(token)`.
+- **`BasePage`** (UI): toda Page Object estende; fornece `driver`, `wait` (15s) e helpers (`esperarVisivel`, `esperarClicavel`, `clicar`, `preencher`, `getUrl`, `esperarUrlContendo`). **Testes de UI NÃO herdam `TestBase`** — criam driver via `DriverFactory` e instanciam a page.
 
 ## API do ezBookKeeping
 
@@ -67,17 +83,21 @@ Herde `TestBase` em todos os testes. Ele configura `RestAssured.baseURI` e `auth
 
 - Package: `com.ezbookkeeping.qa`
 - **BigDecimal para dinheiro** — nunca `double`. Usar `MoneyUtils`.
+- Nomes de métodos de teste no estilo **`deve...`** (pt-BR, sem acento): `deveAutenticarUsuarioComCredenciaisValidas`, `deveRejeitarLoginComSenhaIncorreta`. Mesmo CT usa o mesmo nome em API e UI.
 - Valores em centésimos quando a API representar (`toCents` / `fromCents`)
+- **Dados de teste via `fixtures/TestUsers`** principalmente quando exigido isolamento (ex.: rate-limit)
 - Dados de teste criados via API sempre que possível
 - UI tests usam headless Chrome por padrão (`DriverFactory.createChrome()`)
+- UI tests usam Page Object (`ui/pages/*`); toda page estende `BasePage`; locators centralizados na page; pages não expõem `WebElement` (métodos de estado como `isXxx()`)
 - WebDriver explicit wait: 15s
+- `MoneyUtils` é puro (math); assertions ficam em `MoneyAssertions`
 
 ## Doc de Funcionalidades
 
 `docs/features/*.md` — histórico de cada funcionalidade (descrição, regras, critérios de aceite para API e UI). Consultar ao implementar testes; manter atualizado.
 
-- `docs/features/login.md`
-- `docs/features/cadastro-usuario.md`
+- `docs/features/login/login.md`
+- `docs/features/cadastro-usuario/cadastro-usuario.md`
 
 ## CI (.github/workflows/tests.yml)
 

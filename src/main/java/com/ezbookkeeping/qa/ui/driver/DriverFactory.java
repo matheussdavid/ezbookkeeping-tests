@@ -1,6 +1,5 @@
-package com.ezbookkeeping.qa.utils;
+package com.ezbookkeeping.qa.ui.driver;
 
-import com.ezbookkeeping.qa.config.AppConfig;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;

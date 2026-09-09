@@ -1,5 +1,6 @@
 package com.ezbookkeeping.qa.utils;
 
+import com.ezbookkeeping.qa.config.AppConfig;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
@@ -14,8 +15,8 @@ import java.time.format.DateTimeFormatter;
 
 public final class Screenshot {
 
-    private static final String REPORTS_DIR = "reports/screenshots";
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
 
     private Screenshot() {
     }
@@ -29,7 +30,7 @@ public final class Screenshot {
         String timestamp = LocalDateTime.now().format(FORMATTER);
         String fileName = testName + "_" + timestamp + ".png";
 
-        Path dir = Paths.get(REPORTS_DIR);
+        Path dir = Paths.get(AppConfig.REPORT_DIR, "screenshots");
         try {
             Files.createDirectories(dir);
             Path destination = dir.resolve(fileName);

@@ -1,14 +1,15 @@
 package com.ezbookkeeping.qa.tests.ui;
 
-import com.ezbookkeeping.qa.config.AppConfig;
-import com.ezbookkeeping.qa.utils.DriverFactory;
-import org.junit.jupiter.api.*;
+import com.ezbookkeeping.qa.fixtures.TestUsers;
+import com.ezbookkeeping.qa.ui.driver.DriverFactory;
+import com.ezbookkeeping.qa.ui.pages.LoginPage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,15 +17,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Tag("smoke")
 public class LoginUiTest {
 
-    private static final By RESUMO_ATIVOS =
-            By.xpath("//span[normalize-space()='Resumo de Ativos']");
-
     private WebDriver driver;
+    private LoginPage login;
 
     @BeforeEach
     void setUp() {
         driver = DriverFactory.createChrome();
-        driver.get(AppConfig.UI_URL + "/desktop#/login");
+        login = new LoginPage(driver).abrir();
     }
 
     @AfterEach
@@ -34,183 +33,114 @@ public class LoginUiTest {
         }
     }
 
-    private void preencherCredenciais(String username, String password) {
-        var wait = DriverFactory.wait(driver);
-
-        wait.until(ExpectedConditions.elementToBeClickable(
-                        By.cssSelector("input[autocomplete='username']")))
-                .clear();
-        driver.findElement(By.cssSelector("input[autocomplete='username']"))
-                .sendKeys(username);
-
-        driver.findElement(By.cssSelector("input[type='password']")).clear();
-        driver.findElement(By.cssSelector("input[type='password']"))
-                .sendKeys(password);
-    }
-
-    private void clicarLogin() {
-        var wait = DriverFactory.wait(driver);
-        wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[normalize-space()='Fazer Login']")));
-        driver.findElement(By.xpath("//button[normalize-space()='Fazer Login']")).click();
-    }
-
     @Test
     @DisplayName("CT-001 - Login com credenciais validas")
-    void loginComCredenciaisValidas() {
-        var wait = DriverFactory.wait(driver);
+    void deveAutenticarUsuarioComCredenciaisValidas() {
+        login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
+                .clicarLogin();
 
-        preencherCredenciais(AppConfig.USERNAME, AppConfig.PASSWORD);
-        clicarLogin();
-
-        var resumo = wait.until(ExpectedConditions.visibilityOfElementLocated(RESUMO_ATIVOS));
-        assertThat(resumo.isDisplayed()).isTrue();
-        assertThat(driver.getCurrentUrl())
+        assertThat(login.isLogado()).isTrue();
+        assertThat(login.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }
 
     @Test
     @DisplayName("CT-002 - Enter no campo senha submete o login")
-    void loginComCredenciaisValidasEApertarEnter() {
-        var wait = DriverFactory.wait(driver);
+    void deveAutenticarUsuarioComCredenciaisValidasAoPressionarEnter() {
+        login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
+                .submeterComEnter();
 
-        preencherCredenciais(AppConfig.USERNAME, AppConfig.PASSWORD);
-        driver.findElement(By.cssSelector("input[type='password']")).sendKeys(Keys.ENTER);
-
-        var resumo = wait.until(ExpectedConditions.visibilityOfElementLocated(RESUMO_ATIVOS));
-        assertThat(resumo.isDisplayed()).isTrue();
-        assertThat(driver.getCurrentUrl())
+        assertThat(login.isLogado()).isTrue();
+        assertThat(login.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }
 
     @Test
     @DisplayName("CT-003 - Tentar fazer login com campo Username vazio")
-    void loginComCampoUsernameVazio() {
-        var wait = DriverFactory.wait(driver);
+    void deveRejeitarLoginComCampoUsuarioVazio() {
+        login.preencherCredenciais("", TestUsers.mainPassword())
+                .submeterComEnter();
 
-        preencherCredenciais("", AppConfig.PASSWORD);
-        driver.findElement(By.cssSelector("input[type='password']")).sendKeys(Keys.ENTER);
-
-        var snackbar = wait.until(ExpectedConditions.
-                visibilityOfElementLocated(
-                        By.xpath("//div[@role='status']")));
-
-        assertThat(snackbar.isDisplayed());
-        assertThat(snackbar.getText())
+        assertThat(login.temSnackbar()).isTrue();
+        assertThat(login.getMensagemErro())
                 .containsIgnoringCase("O nome de usuário não pode estar em branco");
-        assertThat(driver.getCurrentUrl()).contains("#/login");
-
+        assertThat(login.getUrl()).contains("#/login");
     }
 
     @Test
     @DisplayName("CT-004 - Tentar fazer login com campo senha vazio")
-    void loginComCampoPasswordVazio() {
-        var wait = DriverFactory.wait(driver);
+    void deveRejeitarLoginComCampoSenhaVazio() {
+        login.preencherCredenciais(TestUsers.mainUsername(), "")
+                .submeterComEnter();
 
-        preencherCredenciais(AppConfig.USERNAME, "");
-        driver.findElement(By.cssSelector("input[type='password']")).sendKeys(Keys.ENTER);
-
-        var snackbar = wait.until(ExpectedConditions.
-                visibilityOfElementLocated(
-                        By.xpath("//div[@role='status']")));
-
-        assertThat(snackbar.isDisplayed());
-        assertThat(snackbar.getText())
+        assertThat(login.temSnackbar()).isTrue();
+        assertThat(login.getMensagemErro())
                 .containsIgnoringCase("A senha não pode estar em branco");
-        assertThat(driver.getCurrentUrl()).contains("#/login");
-
+        assertThat(login.getUrl()).contains("#/login");
     }
 
     @Test
     @DisplayName("CT-005 - O Botão 'Fazer Login' deve estar desabilitado quando os campos de login estão vazios")
-    void loginBotaoLoginDesabilitadoQuandoCamposVazios() {
-        var wait = DriverFactory.wait(driver);
-
-        var loginButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//button[normalize-space()='Fazer Login']")));
-
-        assertThat(loginButton.isEnabled()).isFalse();
+    void deveDesabilitarBotaoLoginQuandoCamposVazios() {
+        assertThat(login.isBotaoLoginHabilitado()).isFalse();
     }
 
     @Test
     @DisplayName("CT-006 - Login com senha errada exibe mensagem de erro")
-    void loginComSenhaErrada() {
-        var wait = DriverFactory.wait(driver);
+    void deveRejeitarLoginComSenhaIncorreta() {
+        login.preencherCredenciais(TestUsers.mainUsername(), "senha_errada_123")
+                .clicarLogin();
 
-        preencherCredenciais(AppConfig.USERNAME, "senha_errada_123");
-        clicarLogin();
-
-        var snackbar = wait.until(ExpectedConditions.
-                visibilityOfElementLocated(
-                        By.xpath("//div[@role='status']")));
-
-                                assertThat(snackbar.getText())
-                                        .containsIgnoringCase("Nome de login ou senha está errado");
-
-        assertThat(driver.getCurrentUrl()).contains("#/login");
+        assertThat(login.temSnackbar()).isTrue();
+        assertThat(login.getMensagemErro())
+                .containsIgnoringCase("Nome de login ou senha está errado");
+        assertThat(login.getUrl()).contains("#/login");
     }
 
-@Test
+    @Test
     @DisplayName("CT-007 - Duplo clique no botao Log In")
-    void loginComDuploCliqueNoBotaoLogIn() {
-        var wait = DriverFactory.wait(driver);
+    void deveAutenticarUsuarioComDuploCliqueNoBotaoLogin() {
+        login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
+                .duploCliqueLogin();
 
-        preencherCredenciais(AppConfig.USERNAME, AppConfig.PASSWORD);
-        var botao = wait.until(ExpectedConditions.
-                elementToBeClickable(By.xpath("//button[normalize-space()='Fazer Login']")));
-        new Actions(driver).doubleClick(botao).perform();
-
-        var resumo = wait.until(ExpectedConditions.visibilityOfElementLocated(RESUMO_ATIVOS));
-        assertThat(resumo.isDisplayed()).isTrue();
-        assertThat(driver.getCurrentUrl())
+        assertThat(login.isLogado()).isTrue();
+        assertThat(login.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }
 
     @Test
     @DisplayName("CT-008 - Link 'Forget Password?' navega para o fluxo de recuperacao de senha")
-    void loginLinkForgetPassword() {
-        var wait = DriverFactory.wait(driver);
+    void deveNavegarParaRecuperacaoDeSenhaAoClicarNoLink() {
+        assertThat(login.getTextoLinkEsqueciSenha()).containsIgnoringCase("esqueceu a senha");
 
-        var link = wait.until(ExpectedConditions.elementToBeClickable(
-                By.cssSelector("a[href$='forgetpassword']")));
+        login.clicarEsqueciSenha()
+                .esperarUrlContendo("#/forgetpassword");
 
-        assertThat(link.getText()).containsIgnoringCase("esqueceu a senha");
-
-        link.click();
-
-        wait.until(ExpectedConditions.urlContains("#/forgetpassword"));
-        assertThat(driver.getCurrentUrl()).contains("#/forgetpassword");
+        assertThat(login.getUrl()).contains("#/forgetpassword");
     }
 
     @Test
     @DisplayName("CT-009 - Link 'Create an account' navega para /signup")
-    void loginLinkCreateAccount() {
-        var wait = DriverFactory.wait(driver);
+    void deveNavegarParaCriarContaAoClicarNoLink() {
+        assertThat(login.getTextoLinkCriarConta()).containsIgnoringCase("criar uma conta");
 
-        var link = wait.until(ExpectedConditions.elementToBeClickable(
-                By.cssSelector("a[href$='signup']")));
+        login.clicarCriarConta()
+                .esperarUrlContendo("#/signup");
 
-        assertThat(link.getText()).containsIgnoringCase("criar uma conta");
-
-        link.click();
-
-        wait.until(ExpectedConditions.urlContains("#/signup"));
-        assertThat(driver.getCurrentUrl()).contains("#/signup");
+        assertThat(login.getUrl()).contains("#/signup");
     }
 
     @Test
     @Disabled("Nao testavel no momento — fluxo de email nao verificado depende de enableUserForceVerifyEmail ativo e usuario com email nao verificado; essa configuracao do servidor nao e controlavel no ambiente de teste.")
     @DisplayName("CT-010 - Email nao verificado — redireciona para /verify_email")
-    void loginComEmailNaoVerificado() {
-        var wait = DriverFactory.wait(driver);
+    void deveRedirecionarParaVerificacaoDeEmailComContaNaoVerificada() {
+        login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
+                .clicarLogin()
+                .esperarUrlContendo("#/verify_email");
 
-        preencherCredenciais(AppConfig.USERNAME, AppConfig.PASSWORD);
-        clicarLogin();
-
-        wait.until(ExpectedConditions.urlContains("/verify_email"));
-
-        assertThat(driver.getCurrentUrl()).contains("#/verify_email");
+        assertThat(login.getUrl()).contains("#/verify_email");
     }
 }

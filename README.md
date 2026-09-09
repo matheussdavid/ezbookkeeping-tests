@@ -8,7 +8,7 @@ Automação de testes para o [ezBookKeeping](https://ezbookkeeping.mayswind.net/
 
 - Java 21
 - REST Assured 5.5.7
-- Selenium WebDriver 4.27.0
+- Selenium WebDriver 4.47.0
 - JUnit 5.11.4
 - AssertJ 3.27.7
 - Maven
@@ -30,7 +30,7 @@ curl http://localhost:8080
 mvn clean test
 ```
 
-> **UI tests requisitos:** Chrome instalado na máquina (headless). O `DriverFactory` gerencia o chromedriver via WebDriverManager.
+> **UI tests requisitos:** Chrome instalado na máquina (headless). O `DriverFactory` gerencia os drivers via Selenium Manager.
 
 ## Profiles
 
@@ -39,21 +39,22 @@ mvn clean test -Psmoke    # Smoke suite (API + UI com tag smoke)
 mvn clean test -Papi      # Apenas API
 mvn clean test -Pui       # Apenas UI
 mvn clean test -Pe2e      # Apenas E2E
+mvn clean test -Prate-limit  # Apenas rate-limit (isolado)
 ```
 
 Executar uma classe específica:
 
 ```bash
 mvn test -Dtest=LoginApiTest        # Classe
-mvn test -Dtest="LoginApiTest#loginComUsernameValido"  # Método
+mvn test -Dtest="LoginApiTest#deveAutenticarUsuarioComCredenciaisValidas"  # Método
 ```
 
 ### Rate limiting
 
-O CT-007 (rate limiting) roda **isolado** em `LoginRateLimitTest` com `@Tag("rate-limit")`. Ele bloqueia o IP por ~1 minuto e **nunca** roda nos profiles padrão:
+O bloqueio do ezBookKeeping é **por IP**, não por usuário. O CT-007 (rate limiting) roda **isolado** em `LoginRateLimitTest` com `@Tag("rate-limit")`, usuário dedicado (`RATE_LIMIT_*`) e `@Execution(SAME_THREAD)`. Por queimar o IP de localhost, ele **nunca roda em runs padrão** (`surefire.excludedGroups=rate-limit`):
 
 ```bash
-mvn test -Dgroups="rate-limit"
+mvn clean test -Prate-limit
 ```
 
 ## Pipeline CI (GitHub Actions)
@@ -74,16 +75,18 @@ Detalhes de CI:
 ## Estrutura
 
 ```
-src/test/java/com/ezbookkeeping/qa/
+src/main/java/com/ezbookkeeping/qa/      Framework (config, core, api, ui, utils, fixtures)
+src/test/java/com/ezbookkeeping/qa/      Apenas casos de teste (tests/api, tests/ui)
 ├── config/       AppConfig (System env > .env > defaults)
+├── core/         TestBase (RestAssured setup + auto-login/registro)
 ├── api/
-│   ├── client/   AuthClient (login/register)
+│   ├── client/   ClientBase, AuthClient (login/register)
 │   └── model/    DTOs (AuthResponse, ApiResponse)
-├── tests/
-│   ├── TestBase.java        Base: RestAssured setup + auto-login/registro
-│   ├── api/                 Testes de API
-│   └── ui/                  Testes de UI
-└── utils/                   DriverFactory, MoneyUtils, Screenshot
+├── ui/
+│   ├── driver/   DriverFactory (Chrome/Firefox)
+│   └── pages/    BasePage (base), LoginPage (Page Object)
+├── utils/        MoneyUtils (puro), MoneyAssertions, Screenshot
+└── fixtures/     TestUsers
 
 docs/features/<funcionalidade>/
 ├── <funcionalidade>.md          Doc de funcionalidade (regras, CAs)

@@ -114,7 +114,7 @@
 - **Resultado esperado:** HTTP 400 com `success: false`, `errorCode: 200018`
 - **CA:** CA-09 - Rate limiting
 - **Regra:** #7
-- **Observacoes:** [SUPOSICAO] Assume-se que o limite e por IP e/ou por usuario. O numero exato de tentativas depende da configuracao do ambiente. Isolado em `LoginRateLimitTest` (`@Tag("rate-limit")`) — roda so com `-Dgroups=rate-limit`, nunca na suite normal.
+- **Observacoes:** O limite e **por IP** (`maxFailuresPerIpPerMinute`) e por usuario. Isolado em `LoginRateLimitTest` (`@Tag("rate-limit")`) — excluido do run default via `surefire.excludedGroups=rate-limit`; roda so com `mvn clean test -Prate-limit`.
 
 ### CT-008 - Login com senha desabilitada
 - **Prioridade:** P1

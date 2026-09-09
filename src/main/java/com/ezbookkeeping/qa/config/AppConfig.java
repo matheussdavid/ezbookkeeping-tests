@@ -15,6 +15,10 @@ public final class AppConfig {
     public static final String EMAIL = get("USER_EMAIL", "qa@teste.com");
     public static final String DEFAULT_CURRENCY = get("DEFAULT_CURRENCY", "BRL");
     public static final String DEFAULT_LANGUAGE = get("DEFAULT_LANGUAGE", "pt_BR");
+    public static final String DEFAULT_TIMEZONE = get("DEFAULT_TIMEZONE", "America/Sao_Paulo");
+    public static final String RATE_LIMIT_USERNAME = get("RATE_LIMIT_USERNAME", "rate_user");
+    public static final String RATE_LIMIT_PASSWORD = get("RATE_LIMIT_PASSWORD", "senha1234");
+    public static final String REPORT_DIR = get("REPORT_DIR", "reports");
 
     private AppConfig() {
     }

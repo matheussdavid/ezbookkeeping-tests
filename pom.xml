@@ -23,55 +23,79 @@
         <selenium.version>4.47.0</selenium.version>
         <extentreports.version>5.1.1</extentreports.version>
         <dotenv.version>2.3.2</dotenv.version>
+        <maven-surefire.version>3.2.5</maven-surefire.version>
+        <surefire.excludedGroups>rate-limit</surefire.excludedGroups>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-java</artifactId>
+                <version>${selenium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.aventstack</groupId>
+                <artifactId>extentreports</artifactId>
+                <version>${extentreports.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.cdimascio</groupId>
+                <artifactId>dotenv-java</artifactId>
+                <version>${dotenv.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- API Testing -->
         <dependency>
             <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
-            <version>${rest-assured.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Test Runner -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Assertions -->
-        <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>${assertj.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson.version}</version>
-            <scope>test</scope>
         </dependency>
 
         <!-- UI Testing -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
-            <scope>test</scope>
+        </dependency>
+
+        <!-- Assertions -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
         </dependency>
 
         <!-- Reports -->
         <dependency>
             <groupId>com.aventstack</groupId>
             <artifactId>extentreports</artifactId>
-            <version>${extentreports.version}</version>
-            <scope>test</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.projectlombok</groupId>
@@ -84,8 +108,12 @@
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
-            <version>${dotenv.version}</version>
-            <scope>test</scope>
+        </dependency>
+
+        <!-- Test Runner -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
         </dependency>
     </dependencies>
 
@@ -94,18 +122,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>${maven-surefire.version}</version>
                 <configuration>
                     <useSystemClassLoader>true</useSystemClassLoader>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>
+                    <excludedGroups>${surefire.excludedGroups}</excludedGroups>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>3.2.5</version>
+                <version>${maven-surefire.version}</version>
             </plugin>
         </plugins>
     </build>
@@ -118,7 +147,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
                         <configuration>
                             <groups>smoke</groups>
                         </configuration>
@@ -133,7 +161,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
                         <configuration>
                             <groups>api</groups>
                         </configuration>
@@ -148,9 +175,25 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
                         <configuration>
                             <groups>ui</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>rate-limit</id>
+            <properties>
+                <surefire.excludedGroups></surefire.excludedGroups>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>rate-limit</groups>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -163,7 +206,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-surefire-plugin</artifactId>
-                        <version>3.2.5</version>
                         <configuration>
                             <groups>e2e</groups>
                         </configuration>

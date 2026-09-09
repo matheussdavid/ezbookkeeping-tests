@@ -8,6 +8,15 @@ public class AuthResponse {
 
     private String token;
     private boolean need2FA;
+    private UserInfo user;
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     @JsonProperty("need2FA")
     public boolean isNeed2FA() {
@@ -18,16 +27,17 @@ public class AuthResponse {
         this.need2FA = need2FA;
     }
 
-    public String getToken() {
-        return token;
+    public UserInfo getUser() {
+        return user;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public void setUser(UserInfo user) {
+        this.user = user;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class UserInfo {
+
         private long uid;
         private String username;
         private String email;
