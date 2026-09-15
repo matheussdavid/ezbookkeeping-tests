@@ -2,6 +2,7 @@ package com.ezbookkeeping.qa.api.client;
 
 import com.ezbookkeeping.qa.api.model.ApiResponse;
 import com.ezbookkeeping.qa.api.model.AuthResponse;
+import com.ezbookkeeping.qa.api.model.RegisterRequest;
 import com.ezbookkeeping.qa.config.AppConfig;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.ValidatableResponse;
@@ -28,19 +29,31 @@ public class AuthClient extends ClientBase {
                 .as(new TypeRef<>() {});
     }
 
-    public ValidatableResponse registerRaw(String username, String email, String password) {
+    public ApiResponse<AuthResponse> register(RegisterRequest request) {
+        return registerRaw(request)
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<>() {});
+    }
+
+    public ValidatableResponse registerRaw(RegisterRequest request) {
         return baseSpec()
-                .body(Map.of(
-                        "username", username,
-                        "email", email,
-                        "password", password,
-                        "language", AppConfig.DEFAULT_LANGUAGE,
-                        "defaultCurrency", AppConfig.DEFAULT_CURRENCY,
-                        "firstDayOfWeek", 1
-                ))
+                .body(request)
                 .when()
                 .post("/api/register.json")
                 .then();
+    }
+
+    public ValidatableResponse registerRaw(String username, String email, String password) {
+        return registerRaw(new RegisterRequest(
+                username,
+                username,
+                email,
+                password,
+                AppConfig.DEFAULT_LANGUAGE,
+                AppConfig.DEFAULT_CURRENCY,
+                1
+        ));
     }
 
     public String getToken(String username, String password) {

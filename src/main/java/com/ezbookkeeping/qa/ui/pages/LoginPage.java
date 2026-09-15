@@ -4,7 +4,6 @@ import com.ezbookkeeping.qa.config.AppConfig;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
 public class LoginPage extends BasePage {
@@ -13,7 +12,6 @@ public class LoginPage extends BasePage {
     private static final By INPUT_PASSWORD = By.cssSelector("input[type='password']");
     private static final By BUTTON_LOGIN = By.xpath("//button[normalize-space()='Fazer Login']");
     private static final By SNACKBAR = By.xpath("//div[@role='status']");
-    private static final By RESUMO_ATIVOS = By.xpath("//span[normalize-space()='Resumo de Ativos']");
     private static final By LINK_FORGET_PASSWORD = By.cssSelector("a[href$='forgetpassword']");
     private static final By LINK_CREATE_ACCOUNT = By.cssSelector("a[href$='signup']");
 
@@ -49,11 +47,6 @@ public class LoginPage extends BasePage {
 
     public boolean isBotaoLoginHabilitado() {
         return esperarVisivel(BUTTON_LOGIN).isEnabled();
-    }
-
-    public boolean isLogado() {
-        esperarVisivel(RESUMO_ATIVOS);
-        return true;
     }
 
     public boolean temSnackbar() {

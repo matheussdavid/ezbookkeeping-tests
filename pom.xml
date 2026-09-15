@@ -23,6 +23,7 @@
         <selenium.version>4.47.0</selenium.version>
         <extentreports.version>5.1.1</extentreports.version>
         <dotenv.version>2.3.2</dotenv.version>
+        <datafaker.version>2.4.2</datafaker.version>
         <maven-surefire.version>3.2.5</maven-surefire.version>
         <surefire.excludedGroups>rate-limit</surefire.excludedGroups>
     </properties>
@@ -63,6 +64,11 @@
                 <groupId>io.github.cdimascio</groupId>
                 <artifactId>dotenv-java</artifactId>
                 <version>${dotenv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.datafaker</groupId>
+                <artifactId>datafaker</artifactId>
+                <version>${datafaker.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -108,6 +114,12 @@
         <dependency>
             <groupId>io.github.cdimascio</groupId>
             <artifactId>dotenv-java</artifactId>
+        </dependency>
+
+        <!-- Test Data -->
+        <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
         </dependency>
 
         <!-- Test Runner -->

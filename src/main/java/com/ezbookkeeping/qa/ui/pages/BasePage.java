@@ -42,4 +42,13 @@ public abstract class BasePage {
         campo.clear();
         campo.sendKeys(texto);
     }
+
+    protected boolean isMarcado(By locator) {
+        return wait.until(ExpectedConditions.
+                presenceOfElementLocated(locator)).isSelected();
+    }
+
+    protected boolean isHabilitado(By locator) {
+        return esperarVisivel(locator).isEnabled();
+    }
 }

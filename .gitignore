@@ -7,6 +7,9 @@ target/
 # Reports (gerados)
 reports/
 
+# Docs locais (nao vao ao GitHub)
+docs/internal/
+
 # Dados locais (SQLite persistente via docker volume)
 data/
 

@@ -2,6 +2,7 @@ package com.ezbookkeeping.qa.tests.ui;
 
 import com.ezbookkeeping.qa.fixtures.TestUsers;
 import com.ezbookkeeping.qa.ui.driver.DriverFactory;
+import com.ezbookkeeping.qa.ui.pages.HomePage;
 import com.ezbookkeeping.qa.ui.pages.LoginPage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,8 +40,9 @@ public class LoginUiTest {
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .clicarLogin();
 
-        assertThat(login.isLogado()).isTrue();
-        assertThat(login.getUrl())
+        HomePage home = new HomePage(driver);
+        assertThat(home.isResumoDeAtivosVisivel()).isTrue();
+        assertThat(home.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }
@@ -51,8 +53,9 @@ public class LoginUiTest {
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .submeterComEnter();
 
-        assertThat(login.isLogado()).isTrue();
-        assertThat(login.getUrl())
+        HomePage home = new HomePage(driver);
+        assertThat(home.isResumoDeAtivosVisivel()).isTrue();
+        assertThat(home.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }
@@ -105,8 +108,9 @@ public class LoginUiTest {
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .duploCliqueLogin();
 
-        assertThat(login.isLogado()).isTrue();
-        assertThat(login.getUrl())
+        HomePage home = new HomePage(driver);
+        assertThat(home.isResumoDeAtivosVisivel()).isTrue();
+        assertThat(home.getUrl())
                 .contains("desktop#/")
                 .doesNotContain("/login");
     }

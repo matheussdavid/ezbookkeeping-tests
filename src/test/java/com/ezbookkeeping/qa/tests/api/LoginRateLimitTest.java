@@ -3,6 +3,7 @@ package com.ezbookkeeping.qa.tests.api;
 import com.ezbookkeeping.qa.api.client.AuthClient;
 import com.ezbookkeeping.qa.core.TestBase;
 import com.ezbookkeeping.qa.fixtures.TestUsers;
+import com.ezbookkeeping.qa.utils.UserFaker;
 import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +25,7 @@ public class LoginRateLimitTest extends TestBase {
     static void prepararUsuarioRateLimit() {
         new AuthClient().registerRaw(
                 TestUsers.rateLimitUsername(),
-                "rate-limit@teste.com",
+                UserFaker.email(),
                 TestUsers.rateLimitPassword())
                 .extract();
     }

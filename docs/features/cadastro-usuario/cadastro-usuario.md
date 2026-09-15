@@ -27,7 +27,7 @@ O fluxo cobre validação de unicidade (username/e-mail), regras de formato, sen
   "language": "en-US",              // Obrigatório, mín 2, máx 16
   "defaultCurrency": "BRL",         // Obrigatório, len 3, moeda ISO 4217
   "firstDayOfWeek": 1,              // 0–6 (opcional)
-  "categories": []                  // Opcional (categorias iniciais em lote)
+  "categories": []                  // Obrigatorio (pode ser [] ou IDs validos de categorias em lote)
 }
 ```
 
@@ -58,7 +58,7 @@ O fluxo cobre validação de unicidade (username/e-mail), regras de formato, sen
 2. **Unicidade de e-mail:** obrigatório e **único**. E-mail já existente → `ErrUserEmailAlreadyExists`.
 3. **Formato username:** regex `^(?i)[a-z0-9_-]+$` (case-insensitive, apenas alfanuméricos, `_` e `-`), máx 32 caracteres.
 4. **Formato e-mail:** RFC 5322 (case-insensitive), máx 100 caracteres.
-5. **Formato nickname:** sem regex, apenas não-blanco e máx 64 caracteres.
+5. **Formato nickname:** obrigatório (não-blanco) e sem regex, máx 64 caracteres.
 6. **Senha:** `required, min=6, max=128`. Armazenada como hash **PBKDF2 (SHA-256, 10.000 iterações, saída 48 bytes)** com salt aleatório (10 caracteres) — nunca em texto claro.
 7. **Moeda padrão:** obrigatória, exatamente 3 caracteres, deve ser moeda ISO 4217 válida → inválida gera `ErrUserDefaultCurrencyIsInvalid`.
 8. **Primeiro dia da semana:** inteiro 0–6 (`WeekDay`).
@@ -67,7 +67,7 @@ O fluxo cobre validação de unicidade (username/e-mail), regras de formato, sen
 11. **Verificação de e-mail:** se `enableUserForceVerifyEmail` → conta criada com e-mail não verificado, retorna `needVerifyEmail` e **sem token de sessão**.
 12. **Trim:** username, e-mail e nickname são normalizados (trim) no cadastro.
 13. **Identificador:** gera um `uid` (UUID) para o novo usuário.
-14. **Categorias iniciais:** opcional — pode receber um lote de categorias para pré-popular a conta (`presetCategoriesSaved`).
+14. **Categorias iniciais:** campo **obrigatório na requisição** — pode ser `[]` (sem pré-popular) ou um lote de IDs válidos de categorias (`presetCategoriesSaved` true quando o lote é salvo). Se ausente → `parameter "categories" is required`.
 
 ---
 
@@ -129,9 +129,12 @@ Fonte: `src/views/base/SignupPageBase.ts`, `src/views/desktop/SignupPage.vue`, `
 | **Default Currency** | select | moeda ISO 4217 |
 
 ### Comportamento
-- **Troca de idioma** no topo atualiza o `defaultCurrency` e o `firstDayOfWeek` padrão para o locale selecionado.
-- **Botão de criar conta** fica **desabilitado** se `inputIsEmpty` (algum campo obrigatório vazio) ou `inputIsInvalid`.
-- **Confirmação de senha:** se `password !== confirmPassword` → validação client bloqueia o submit.
+- **Desktop é dividido em 2 etapas:** (1) dados básicos do usuário e (2) categorias predefinidas. Para ver o botão "Enviar" (criar conta) é preciso concluir a etapa 1.
+- **Botão "Próximo" (desktop, etapa 1)** **nunca** desabilita por campo vazio/inválido — a validação ocorre **no clique**, exibindo a 1ª mensagem da ordem de checagem via snackbar.
+- **Botão "Enviar" (desktop, etapa 2)** **nunca** desabilita: só é renderizado após a etapa 1 válida e sempre cria a conta, mesmo sem marcar categorias predefinidas (`presetCategories: []`, aceito pela API). **Categorias predefinidas são opcionais.**
+- **Botão "criar conta" desabilitado** é comportamento **mobile-only**: na navbar do `mobile#/signup`, o link "Sign Up" ganha `disabled` quando `inputIsEmpty` (`disabled: inputIsEmpty || submitting`).
+- **Confirmação de senha:** se `password !== confirmPassword` → validação client bloqueia o avanço/sumite.
+- **Mínimo de 6 caracteres na senha NÃO é validado no client** — só o binding da API (`required, min=6`). Um formulário com senha curta (mas não vazia) avança as etapas normalmente e só falha no `POST /api/register.json`.
 - Durante o envio, os campos ficam desabilitados.
 - **Erros** da API → snackbar (desktop) / toast (mobile) com a mensagem.
 - **Sucesso** → `doAfterSignupSuccess(authResponse)`: aplica idioma/cor/moeda e redireciona (login implícito).
@@ -150,12 +153,13 @@ Fonte: `src/views/base/SignupPageBase.ts`, `src/views/desktop/SignupPage.vue`, `
 
 ## Regras de negócio (UI)
 
-1. **Confirmação de senha** é exigida na UI (não existe no contrato da API) — deve bater com a senha antes do submit.
+1. **Confirmação de senha** é exigida na UI (não existe no contrato da API) — deve bater com a senha antes do submit. Frontend em 2 etapas no desktop (básicas → categorias).
 2. **Campos obrigatórios** validados client-side antes de qualquer chamada à API.
-3. **Botão desabilitado** quando há campo obrigatório vazio ou validação inválida.
+3. **Botão desabilitado com campo vazio** → **vale apenas no mobile** (link "Sign Up" da navbar com `disabled` quando `inputIsEmpty`). No **desktop** os botões "Próximo"/"Enviar" **não desabilitam** por campo vazio/inválido: a validação acontece por **snackbar no clique**; o "Enviar" só existe após a etapa 1 válida e está sempre habilitado.
 4. **Feedback visual** (snackbar/toast) para erros da API e validações.
 5. **Login implícito** pós-cadastro: ao sucesso, o usuário é autenticado e redirecionado (a menos que exija verificação de e-mail).
 6. **Locale influencia defaults:** trocar idioma ajusta moeda padrão e primeiro dia da semana.
+7. **Categorias predefinidas opcionais:** o cadastro é concluído sem marcá-las (`presetCategories: []`).
 
 ---
 
@@ -175,16 +179,30 @@ Fonte: `src/views/base/SignupPageBase.ts`, `src/views/desktop/SignupPage.vue`, `
 - **Quando** tento criar a conta
 - **Então** exibe a respectiva mensagem "...cannot be blank" e **não** chama a API
 
-- **Dado** qualquer campo obrigatório vazio ou inválido
-- **Então** o botão de criar conta permanece desabilitado
+- **Dado** no mínimo um campo obrigatório em branco
+- **Quando** clico no botão "Próximo"
+- **Então** a snackbar exibe a **primeira** mensagem da ordem de checagem ao invés de avançar; ao preencher o campo indicado e clicar novamente, a mensagem avança para o próximo campo vazio (username → password → confirm → email → nickname)
+
+- **Dado** o campo "Default Currency" ainda em branco
+- **Quando** tento avançar o formulário
+- **Então** exibe "Default currency cannot be blank"
+
+    > **Alcance de teste (UI):** a moeda padrão vem **pré-preenchida** com o default do locale (`generateNewUserModel`) e o `CurrencySelect` (v-autocomplete) **não permite limpar** o model sem selecionar uma opção — a mensagem de moeda em branco é **indisponível via interação**. O CT-003 cobre as 5 primeiras mensagens sequencialmente (snackbar avança campo a campo) e avança para o passo de categorias apenas após o último campo preenchido. A garantia de "nenhuma chamada à API" vem **por construção**: `POST /api/register.json` só é disparado pelo botão "Enviar" (`submit()`, `SignupPage.vue`) do 2º passo, que este teste nunca aciona.
+
+- **Dado** qualquer campo obrigatório vazio ou inválido (regra **mobile-only**)
+- **Então** o link "Sign Up" da navbar (`mobile#/signup`) permanece com a classe `disabled` (`inputIsEmpty || submitting`)
+
+    > **Alcance de teste (desktop):** no desktop não existe botão a desabilitar — "Próximo" e "Enviar" nunca desabilitam por campo vazio/inválido (validação por snackbar, ver Comportamento). A regra de botão desabilitado é **exclusiva do mobile**, cuja automação não está prevista no projeto → **CT-004 adiado**.
+
+- **Dado** cadastro preenchido corretamente porém **sem** marcar categorias predefinidas
+- **Quando** clico em "Enviar" na etapa de categorias
+- **Então** a conta é criada normalmente (categorias predefinidas são **opcionais**) — mesmo comportamento do caminho feliz
 
 - **Dado** username ou e-mail já em uso
 - **Quando** submeto o cadastro
 - **Então** exibe snackbar/toast de erro de conflito e permaneço na página de cadastro
 
-- **Dado** registro com exigência de verificação de e-mail habilitada
-- **Quando** concluo o cadastro
-- **Então** sou direcionado ao fluxo `/verify_email` antes de obter acesso completo
+    > **Alcance de teste (UI):** o conflito só é detectado no botão "Enviar" (2ª etapa) após `POST /api/register.json` real, que devolve 400 com `ErrUsernameAlreadyExists`/`ErrUserEmailAlreadyExists` — a snackbar exibe a tradução pt-BR "O nome de usuário já existe" (201012) / "O e-mail já existe" (201013) e o usuário **não** autentica. CT-005 cobre as duas variações via pré-seed: o usuário de apoio é criado pela API (`AuthClient.register` + `UserFaker.randomRegister()`) e o teste UI reúsa apenas o campo em conflito (username ou email).
 
 ---
 
