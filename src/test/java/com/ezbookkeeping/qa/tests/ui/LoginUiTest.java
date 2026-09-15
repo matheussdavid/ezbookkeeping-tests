@@ -15,7 +15,6 @@ import org.openqa.selenium.WebDriver;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("ui")
-@Tag("smoke")
 public class LoginUiTest {
 
     private WebDriver driver;
@@ -35,6 +34,7 @@ public class LoginUiTest {
     }
 
     @Test
+    @Tag("smoke")
     @DisplayName("CT-001 - Login com credenciais validas")
     void deveAutenticarUsuarioComCredenciaisValidas() {
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())

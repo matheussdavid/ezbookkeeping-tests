@@ -15,7 +15,6 @@ import org.openqa.selenium.WebDriver;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("ui")
-@Tag("smoke")
 public class SignUpUiTest {
 
     private final AuthClient auth = new AuthClient();
@@ -44,6 +43,7 @@ public class SignUpUiTest {
     }
 
     @Test
+    @Tag("smoke")
     @DisplayName("CT-001 - Cadastro com sucesso e login implicito")
     void devePreencherFluxoPrincipalDeCadastroDeUsuario() {
         String senha = UserFaker.password();

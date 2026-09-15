@@ -44,7 +44,6 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @Tag("smoke")
     @DisplayName("CT-003 - Login com senha errada retorna 401")
     public void deveRejeitarLoginComSenhaIncorreta() {
         var response = auth.loginRaw(TestUsers.mainUsername(), "12131415")
@@ -57,7 +56,6 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @Tag("smoke")
     @DisplayName("CT-004 - Login com campos obrigatorios vazios")
     public void deveRejeitarLoginComCamposObrigatoriosVazios() {
         var response = auth.loginRaw("", "")
@@ -90,7 +88,6 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @Tag("smoke")
     @DisplayName("CT-010 - Senha não retornada em claro na resposta")
     public void deveNaoRetornarSenhaEmClaroNaResposta() {
         var response = auth.loginRaw(TestUsers.mainUsername(), TestUsers.mainPassword())
