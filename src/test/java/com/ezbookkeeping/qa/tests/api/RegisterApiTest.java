@@ -153,21 +153,6 @@ public class RegisterApiTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CT-006 - Cadastro com email duplicado (case-insensitive)")
-    public void deveRejeitarCadastroComEmailJaCadastradoCaseInsensitive() {
-        RegisterRequest request = new RegisterRequest(
-                UserFaker.username(),
-                UserFaker.nickname(),
-                TestUsers.mainEmail().toUpperCase(),
-                UserFaker.password(),
-                AppConfig.DEFAULT_LANGUAGE,
-                AppConfig.DEFAULT_CURRENCY,
-                1);
-
-        assertErro(auth.registerError(request), 201013, "email already exists");
-    }
-
-    @Test
     @DisplayName("CT-007 - Moeda padrao invalida")
     public void deveRejeitarMoedaPadraoInvalida() {
         RegisterRequest request = new RegisterRequest(

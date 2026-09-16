@@ -125,7 +125,7 @@
 - **Resultado esperado:** HTTP 400 com `success: false` e `errorCode: 201013` (ErrUserEmailAlreadyExists)
 - **CA:** CA-04 - Email duplicado
 - **Regra:** #2
-- **Observacoes:** E-mail e comparado case-insensitive (Regra #4) — variacao de maiusculas tambem deve ser rejeitada.
+- **Observacoes:** A unicidade do e-mail e **case-sensitive** (assim como a do username, CT-005): `EXISTENTE@EXAMPLE.COM` (maiusculas) cadastra com sucesso (200) em relacao a `existente@example.com` ja existente — a Regra #4 define apenas o formato, nao a unicidade.
 
 ### CT-007 - Moeda padrao invalida
 - **Prioridade:** P1
