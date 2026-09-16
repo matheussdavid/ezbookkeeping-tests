@@ -65,9 +65,9 @@ O fluxo cobre validação de unicidade (username/e-mail), regras de formato, sen
 9. **Idioma:** obrigatório, mín 2 e máx 16 caracteres (ex.: `en-US`, `pt-BR`).
 10. **Registro desabilitado:** se `enableUserRegister = false` → `ErrUserRegistrationNotAllowed`.
 11. **Verificação de e-mail:** se `enableUserForceVerifyEmail` → conta criada com e-mail não verificado, retorna `needVerifyEmail` e **sem token de sessão**.
-12. **Trim:** username, e-mail e nickname são normalizados (trim) no cadastro.
+12. **Trim:** nickname e normalizado (trim) no cadastro. Trim de username/e-mail e **inalcancavel via API**: a validacao de formato (regex username / RFC 5322 email) rejeita espacos nas bordas antes do trim (`parameter "X" is invalid <type> format`).
 13. **Identificador:** gera um `uid` (UUID) para o novo usuário.
-14. **Categorias iniciais:** campo **obrigatório na requisição** — pode ser `[]` (sem pré-popular) ou um lote de IDs válidos de categorias (`presetCategoriesSaved` true quando o lote é salvo). Se ausente → `parameter "categories" is required`.
+14. **Categorias iniciais:** campo **obrigatório na requisição** — pode ser `[]` (sem pré-popular) ou um lote no shape `{ name, type, icon, color, subCategories }` (type 1=receita, 2=despesa, 3=transferencia). Categorias enviadas são salvas **verbatim**; se ausente → `parameter "categories" is required`; se `[]` → server auto-cria o catálogo default do locale e `presetCategoriesSaved` false; se lote não-vazio → `presetCategoriesSaved` true.
 
 ---
 

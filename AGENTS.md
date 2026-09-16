@@ -22,6 +22,7 @@ mvn clean test -Papi           # apenas API
 mvn clean test -Pui            # apenas UI
 mvn clean test -Pe2e           # apenas E2E
 mvn clean test -Prate-limit    # apenas rate-limit (isolado)
+mvn clean test -Pcontract      # apenas testes de contrato (API, JSON Schema)
 ```
 
 Profiles usam JUnit 5 tags. Test classes devem ter `@Tag("api")`, `@Tag("ui")`, `@Tag("e2e")` e opcionalmente `@Tag("smoke")`.
@@ -61,10 +62,30 @@ src/main/java/com/ezbookkeeping/qa/
 └── fixtures/TestUsers.java        # usuários de teste
 
 src/test/java/com/ezbookkeeping/qa/tests/
-├── api/                           # testes de API
-├── ui/                            # testes de UI
+├── api/                           # testes de API (por recurso/endpoint)
+│   ├── AuthorizeApiTest.java      # POST /api/authorize.json
+│   ├── RegisterApiTest.java       # POST /api/register.json
+│   ├── TokensApiTest.java         # GET /api/v1/tokens/list.json
+│   └── LoginRateLimitTest.java    # rate-limit (isolado)
+├── ui/                            # testes de UI (por feature)
 └── e2e/                           # testes E2E (futuro)
+
+src/test/resources/schemas/        # JSON Schema estritos dos contratos
+├── auth/                          # authorize-response.json, register-response.json
+├── v1/                            # tokens-list-response.json (por endpoint autenticado)
+└── common/error-response.json     # shape de erro compartilhado
 ```
+
+## Contrato (JSON Schema)
+
+- Testes de contrato rodam com `mvn clean test -Pcontract` (tag `@Tag("contract")`, também `@Tag("api")`).
+- Schemas em `src/test/resources/schemas/<camada>/<endpoint>-response.json`, sempre **estritos**:
+  `additionalProperties: false` + todos os campos conhecidos enumerados e tipados em `properties`
+  (`required` só para os obrigatórios). Campo novo ausente do schema faz o teste falhar de propósito
+  (sinaliza mudança de contrato).
+- Interpolação em testes: `.body(matchesJsonSchemaInClasspath("schemas/..."))`.
+- Validação em casos de erro usa `schemas/common/error-response.json` (`errorCode`, `errorMessage`,
+  `path`, `success: false`).
 
 ## Bases
 
@@ -87,6 +108,7 @@ src/test/java/com/ezbookkeeping/qa/tests/
 - Valores em centésimos quando a API representar (`toCents` / `fromCents`)
 - **Dados de teste via `fixtures/TestUsers`** principalmente quando exigido isolamento (ex.: rate-limit)
 - Dados de teste criados via API sempre que possível
+- **Classes de teste API nomeadas por recurso/endpoint** (`AuthorizeApiTest`, `RegisterApiTest`, `TokensApiTest`); o contrato de um endpoint mora na classe do recurso (ex.: tokens/list em `TokensApiTest`), mesmo que a feature doc o referencie. Classes de UI continuam por feature (`LoginUiTest`, `SignUpUiTest`).
 - UI tests usam headless Chrome por padrão (`DriverFactory.createChrome()`)
 - UI tests usam Page Object (`ui/pages/*`); toda page estende `BasePage`; locators centralizados na page; pages não expõem `WebElement` (métodos de estado como `isXxx()`)
 - WebDriver explicit wait: 15s

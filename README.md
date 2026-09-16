@@ -45,8 +45,8 @@ mvn clean test -Prate-limit  # Apenas rate-limit (isolado)
 Executar uma classe específica:
 
 ```bash
-mvn test -Dtest=LoginApiTest        # Classe
-mvn test -Dtest="LoginApiTest#deveAutenticarUsuarioComCredenciaisValidas"  # Método
+mvn test -Dtest=AuthorizeApiTest        # Classe
+mvn test -Dtest="AuthorizeApiTest#deveAutenticarUsuarioComCredenciaisValidas"  # Método
 ```
 
 ### Rate limiting

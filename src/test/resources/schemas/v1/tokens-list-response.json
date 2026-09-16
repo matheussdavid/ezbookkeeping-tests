@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GET /api/v1/tokens/list.json - success response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["result", "success"],
+  "properties": {
+    "success": {
+      "const": true
+    },
+    "result": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/token"
+      }
+    }
+  },
+  "$defs": {
+    "token": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tokenId", "tokenType", "userAgent", "lastSeen", "isCurrent"],
+      "properties": {
+        "tokenId": { "type": "string" },
+        "tokenType": { "type": "integer" },
+        "userAgent": { "type": "string" },
+        "lastSeen": { "type": "integer" },
+        "isCurrent": { "type": "boolean" }
+      }
+    }
+  }
+}

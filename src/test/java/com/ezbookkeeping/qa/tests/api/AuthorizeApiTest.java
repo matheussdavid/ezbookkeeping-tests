@@ -5,21 +5,40 @@ import com.ezbookkeeping.qa.api.model.ApiResponse;
 import com.ezbookkeeping.qa.api.model.AuthResponse;
 import com.ezbookkeeping.qa.core.TestBase;
 import com.ezbookkeeping.qa.fixtures.TestUsers;
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 @Tag("api")
-public class LoginApiTest extends TestBase {
+public class AuthorizeApiTest extends TestBase {
 
     private final AuthClient auth = new AuthClient();
 
     @Test
+    @Tag("contract")
     @Tag("smoke")
-    @DisplayName("CT-001 - Login com username e senha válidos, retorna token e success = true")
+    @DisplayName("CT-001 - Contrato do response de sucesso do POST /api/authorize.json")
+    public void deveValidarContratoDeSucessoDoAuthorize() {
+        auth.loginRaw(TestUsers.mainUsername(), TestUsers.mainPassword())
+                .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("schemas/auth/authorize-response.json"));
+    }
+
+    @Test
+    @Tag("contract")
+    @DisplayName("CT-002 - Contrato do response de erro do POST /api/authorize.json")
+    public void deveValidarContratoDeErroDoAuthorize() {
+        auth.loginRaw(TestUsers.mainUsername(), "senhaErrada")
+                .statusCode(401)
+                .body(matchesJsonSchemaInClasspath("schemas/common/error-response.json"));
+    }
+
+    @Test
+    @Tag("smoke")
+    @DisplayName("CT-003 - Login com username e senha válidos, retorna token e success = true")
     public void deveAutenticarUsuarioComCredenciaisValidas() {
         ApiResponse<AuthResponse> response =
                 auth.login(TestUsers.mainUsername(), TestUsers.mainPassword());
@@ -32,7 +51,7 @@ public class LoginApiTest extends TestBase {
 
     @Test
     @Tag("smoke")
-    @DisplayName("CT-002 - Login com email e senha válidos, retorna token e success = true")
+    @DisplayName("CT-004 - Login com email e senha válidos, retorna token e success = true")
     public void deveAutenticarUsuarioComEmailValido() {
         ApiResponse<AuthResponse> response =
                 auth.login(TestUsers.mainEmail(), TestUsers.mainPassword());
@@ -44,7 +63,7 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CT-003 - Login com senha errada retorna 401")
+    @DisplayName("CT-005 - Login com senha errada retorna 401")
     public void deveRejeitarLoginComSenhaIncorreta() {
         var response = auth.loginRaw(TestUsers.mainUsername(), "12131415")
                 .extract();
@@ -56,7 +75,7 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CT-004 - Login com campos obrigatorios vazios")
+    @DisplayName("CT-006 - Login com campos obrigatorios vazios")
     public void deveRejeitarLoginComCamposObrigatoriosVazios() {
         var response = auth.loginRaw("", "")
                 .extract();
@@ -68,27 +87,7 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @Tag("smoke")
-    @DisplayName("CT-009 - Token valido concede acesso a endpoints autenticados")
-    public void deveConcederAcessoAEndpointAutenticadoComTokenValido() {
-        String token = auth.login(TestUsers.mainUsername(), TestUsers.mainPassword())
-                .getResult().getToken();
-
-        var response = RestAssured.given()
-                .header("Authorization", "Bearer " + token)
-                .when()
-                .get("/api/v1/tokens/list.json")
-                .then()
-                .extract();
-
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.body().jsonPath().getBoolean("success")).isTrue();
-        Object result = response.body().jsonPath().get("result");
-        assertThat(result).isNotNull();
-    }
-
-    @Test
-    @DisplayName("CT-010 - Senha não retornada em claro na resposta")
+    @DisplayName("CT-007 - Senha não retornada em claro na resposta")
     public void deveNaoRetornarSenhaEmClaroNaResposta() {
         var response = auth.loginRaw(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .extract();
@@ -102,7 +101,7 @@ public class LoginApiTest extends TestBase {
     }
 
     @Test
-    @DisplayName("CT-011 - Login passando username em formato invalido")
+    @DisplayName("CT-008 - Login passando username em formato invalido")
     public void deveRejeitarLoginComUsernameEmFormatoInvalido() {
         var response = auth.loginRaw("user teste", "123456")
                 .extract();

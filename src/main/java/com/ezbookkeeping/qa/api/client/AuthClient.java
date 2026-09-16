@@ -1,8 +1,10 @@
 package com.ezbookkeeping.qa.api.client;
 
+import com.ezbookkeeping.qa.api.model.ApiError;
 import com.ezbookkeeping.qa.api.model.ApiResponse;
 import com.ezbookkeeping.qa.api.model.AuthResponse;
 import com.ezbookkeeping.qa.api.model.RegisterRequest;
+import com.ezbookkeeping.qa.api.model.RegisterResponse;
 import com.ezbookkeeping.qa.config.AppConfig;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.ValidatableResponse;
@@ -29,7 +31,14 @@ public class AuthClient extends ClientBase {
                 .as(new TypeRef<>() {});
     }
 
-    public ApiResponse<AuthResponse> register(RegisterRequest request) {
+    public ApiError registerError(RegisterRequest request) {
+        return registerRaw(request)
+                .statusCode(400)
+                .extract()
+                .as(ApiError.class);
+    }
+
+    public ApiResponse<RegisterResponse> register(RegisterRequest request) {
         return registerRaw(request)
                 .statusCode(200)
                 .extract()

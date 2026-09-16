@@ -25,6 +25,14 @@ public final class UserFaker {
 
     public static String nickname() { return FAKER.name().name(); }
 
+    public static String lowercaseAlpha(int length) {
+        return FAKER.regexify("[a-z]{" + length + "}");
+    }
+
+    public static String alphanumeric(int length) {
+        return FAKER.regexify("[a-zA-Z0-9]{" + length + "}");
+    }
+
     public static RegisterRequest randomRegister() {
         return new RegisterRequest(
                 username(),

@@ -1,8 +1,11 @@
 package com.ezbookkeeping.qa.api.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RegisterRequest {
 
     private String username;
@@ -12,7 +15,7 @@ public class RegisterRequest {
     private String language;
     private String defaultCurrency;
     private int firstDayOfWeek;
-    private List<String> categories = new ArrayList<>();
+    private List<CategoryDraft> categories = new ArrayList<>();
 
     public RegisterRequest() {
     }
@@ -56,11 +59,11 @@ public class RegisterRequest {
         return firstDayOfWeek;
     }
 
-    public List<String> getCategories() {
+    public List<CategoryDraft> getCategories() {
         return categories;
     }
 
-    public void setCategories(List<String> categories) {
+    public void setCategories(List<CategoryDraft> categories) {
         this.categories = categories;
     }
 }

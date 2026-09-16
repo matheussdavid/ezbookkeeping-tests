@@ -86,6 +86,13 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
+        <!-- JSON Schema (testes de contrato) -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${rest-assured.version}</version>
+        </dependency>
+
         <!-- UI Testing -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -220,6 +227,20 @@
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
                             <groups>e2e</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>contract</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <groups>contract</groups>
                         </configuration>
                     </plugin>
                 </plugins>

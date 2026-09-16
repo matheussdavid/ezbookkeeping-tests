@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "POST /api/register.json - success response",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["result", "success"],
+  "properties": {
+    "success": {
+      "const": true
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["token", "need2FA", "user", "needVerifyEmail", "presetCategoriesSaved"],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 1
+        },
+        "need2FA": {
+          "type": "boolean"
+        },
+        "needVerifyEmail": {
+          "type": "boolean"
+        },
+        "presetCategoriesSaved": {
+          "type": "boolean"
+        },
+        "user": {
+          "$ref": "#/$defs/user"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "user": {
+      "title": "NewUserInfo",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "username", "email", "nickname", "avatar", "avatarProvider",
+        "defaultAccountId", "useLastReconciledTime", "transactionEditScope",
+        "language", "defaultCurrency", "firstDayOfWeek", "fiscalYearStart",
+        "calendarDisplayType", "dateDisplayType", "longDateFormat",
+        "shortDateFormat", "longTimeFormat", "shortTimeFormat",
+        "fiscalYearFormat", "currencyDisplayType", "numeralSystem",
+        "decimalSeparator", "digitGroupingSymbol", "digitGrouping",
+        "coordinateDisplayType", "expenseAmountColor", "incomeAmountColor",
+        "emailVerified"
+      ],
+      "properties": {
+        "username": { "type": "string" },
+        "email": { "type": "string" },
+        "nickname": { "type": "string" },
+        "avatar": { "type": "string" },
+        "avatarProvider": { "type": "string" },
+        "defaultAccountId": { "type": "string" },
+        "useLastReconciledTime": { "type": "boolean" },
+        "transactionEditScope": { "type": "integer" },
+        "language": { "type": "string" },
+        "defaultCurrency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "firstDayOfWeek": { "type": "integer" },
+        "fiscalYearStart": { "type": "integer" },
+        "calendarDisplayType": { "type": "integer" },
+        "dateDisplayType": { "type": "integer" },
+        "longDateFormat": { "type": "integer" },
+        "shortDateFormat": { "type": "integer" },
+        "longTimeFormat": { "type": "integer" },
+        "shortTimeFormat": { "type": "integer" },
+        "fiscalYearFormat": { "type": "integer" },
+        "currencyDisplayType": { "type": "integer" },
+        "numeralSystem": { "type": "integer" },
+        "decimalSeparator": { "type": "integer" },
+        "digitGroupingSymbol": { "type": "integer" },
+        "digitGrouping": { "type": "integer" },
+        "coordinateDisplayType": { "type": "integer" },
+        "expenseAmountColor": { "type": "integer" },
+        "incomeAmountColor": { "type": "integer" },
+        "emailVerified": { "type": "boolean" }
+      }
+    }
+  }
+}
