@@ -102,7 +102,7 @@ public class SignUpPage extends BasePage{
             WebElement input = campo.findElement(By.tagName("input"));
 
             try {
-                input.click();
+                campo.click();
                 input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
                 input.sendKeys(nomeOuCodigo);
                 clicar(opcaoComTexto(nomeOuCodigo));
