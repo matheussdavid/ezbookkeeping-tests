@@ -91,21 +91,21 @@ public class SignUpPage extends BasePage{
     }
 
     public SignUpPage selecionarMoedaPadrao(String nomeOuCodigo) {
+        // O campo guarda o texto da moeda selecionada. Limpar via JS + dispatchEvent
+        // perde a corrida com o re-render do Vuetify e o filtro nao aplica (a lista
+        // e virtualizada e a opcao nao aparece). Limpar por teclado nativo passa pelo
+        // mesmo pipeline de eventos do usuario. Sob carga (smoke paralelo) ate o clear
+        // nativo pode perder a corrida, entao a tentativa e revalidada: se a opcao
+        // filtrada nao aparecer, limpa e digita de novo (clear e idempotente).
         for (int tentativa = 1; tentativa <= 3; tentativa++) {
             WebElement campo = esperarClicavel(DROPDOWN_CURRENCY);
+            WebElement input = campo.findElement(By.tagName("input"));
+
+            input.click();
+            input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+            input.sendKeys(nomeOuCodigo);
 
             try {
-                campo.click();
-
-                ((JavascriptExecutor) driver).executeScript(
-                    "const inp = arguments[0].querySelector('input');" +
-                    "const setter = Object.getOwnPropertyDescriptor(" +
-                    "  window.HTMLInputElement.prototype, 'value').set;" +
-                    "setter.call(inp, arguments[1]);" +
-                    "inp.dispatchEvent(new Event('input', {bubbles: true}));" +
-                    "inp.dispatchEvent(new Event('change', {bubbles: true}));",
-                    campo, nomeOuCodigo);
-
                 clicar(opcaoComTexto(nomeOuCodigo));
                 return this;
             } catch (TimeoutException | StaleElementReferenceException | ElementNotInteractableException e) {
