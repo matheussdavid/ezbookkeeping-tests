@@ -1,42 +1,28 @@
 package com.ezbookkeeping.qa.tests.ui;
 
 import com.ezbookkeeping.qa.fixtures.TestUsers;
-import com.ezbookkeeping.qa.ui.driver.DriverFactory;
 import com.ezbookkeeping.qa.ui.pages.HomePage;
 import com.ezbookkeeping.qa.ui.pages.LoginPage;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.WebDriver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("ui")
-public class LoginUiTest {
+public class LoginUiTest extends BaseUiTest {
 
-    private WebDriver driver;
-    private LoginPage login;
-
-    @BeforeEach
-    void setUp() {
-        driver = DriverFactory.createChrome();
-        login = new LoginPage(driver).abrir();
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+    private LoginPage abrirLogin() {
+        return new LoginPage(driver).abrir();
     }
 
     @Test
     @Tag("smoke")
     @DisplayName("CT-001 - Login com credenciais validas")
     void deveAutenticarUsuarioComCredenciaisValidas() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .clicarLogin();
 
@@ -50,6 +36,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-002 - Enter no campo senha submete o login")
     void deveAutenticarUsuarioComCredenciaisValidasAoPressionarEnter() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .submeterComEnter();
 
@@ -63,6 +51,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-003 - Tentar fazer login com campo Username vazio")
     void deveRejeitarLoginComCampoUsuarioVazio() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais("", TestUsers.mainPassword())
                 .submeterComEnter();
 
@@ -75,6 +65,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-004 - Tentar fazer login com campo senha vazio")
     void deveRejeitarLoginComCampoSenhaVazio() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), "")
                 .submeterComEnter();
 
@@ -87,12 +79,16 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-005 - O Botão 'Fazer Login' deve estar desabilitado quando os campos de login estão vazios")
     void deveDesabilitarBotaoLoginQuandoCamposVazios() {
+        LoginPage login = abrirLogin();
+
         assertThat(login.isBotaoLoginHabilitado()).isFalse();
     }
 
     @Test
     @DisplayName("CT-006 - Login com senha errada exibe mensagem de erro")
     void deveRejeitarLoginComSenhaIncorreta() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), "senha_errada_123")
                 .clicarLogin();
 
@@ -105,6 +101,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-007 - Duplo clique no botao Log In")
     void deveAutenticarUsuarioComDuploCliqueNoBotaoLogin() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .duploCliqueLogin();
 
@@ -118,6 +116,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-008 - Link 'Forget Password?' navega para o fluxo de recuperacao de senha")
     void deveNavegarParaRecuperacaoDeSenhaAoClicarNoLink() {
+        LoginPage login = abrirLogin();
+
         assertThat(login.getTextoLinkEsqueciSenha()).containsIgnoringCase("esqueceu a senha");
 
         login.clicarEsqueciSenha()
@@ -129,6 +129,8 @@ public class LoginUiTest {
     @Test
     @DisplayName("CT-009 - Link 'Create an account' navega para /signup")
     void deveNavegarParaCriarContaAoClicarNoLink() {
+        LoginPage login = abrirLogin();
+
         assertThat(login.getTextoLinkCriarConta()).containsIgnoringCase("criar uma conta");
 
         login.clicarCriarConta()
@@ -141,6 +143,8 @@ public class LoginUiTest {
     @Disabled("Nao testavel no momento — fluxo de email nao verificado depende de enableUserForceVerifyEmail ativo e usuario com email nao verificado; essa configuracao do servidor nao e controlavel no ambiente de teste.")
     @DisplayName("CT-010 - Email nao verificado — redireciona para /verify_email")
     void deveRedirecionarParaVerificacaoDeEmailComContaNaoVerificada() {
+        LoginPage login = abrirLogin();
+
         login.preencherCredenciais(TestUsers.mainUsername(), TestUsers.mainPassword())
                 .clicarLogin()
                 .esperarUrlContendo("#/verify_email");

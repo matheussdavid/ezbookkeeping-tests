@@ -3,49 +3,37 @@ package com.ezbookkeeping.qa.tests.ui;
 import com.ezbookkeeping.qa.api.client.AuthClient;
 import com.ezbookkeeping.qa.api.model.RegisterRequest;
 import com.ezbookkeeping.qa.config.AppConfig;
-import com.ezbookkeeping.qa.ui.driver.DriverFactory;
 import com.ezbookkeeping.qa.ui.pages.HomePage;
-import com.ezbookkeeping.qa.ui.pages.LoginPage;
 import com.ezbookkeeping.qa.ui.pages.SignUpPage;
 import com.ezbookkeeping.qa.utils.UserFaker;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.*;
-import org.openqa.selenium.WebDriver;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Tag("ui")
-public class SignUpUiTest {
+public class SignUpUiTest extends BaseUiTest {
 
     private final AuthClient auth = new AuthClient();
-
-    private WebDriver driver;
-    private SignUpPage signup;
 
     @BeforeAll
     static void configurarRestAssured() {
         RestAssured.baseURI = AppConfig.BASE_URL;
     }
 
-    @BeforeEach
-    void setUp() {
-        driver = DriverFactory.createChrome();
-        new LoginPage(driver).abrir().clicarCriarConta();
-        signup = new SignUpPage(driver);
-        signup.esperarUrlContendo("#/signup");
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
+    private SignUpPage navegarParaCadastro() {
+        return new SignUpPage(driver).abrir();
     }
 
     @Test
     @Tag("smoke")
     @DisplayName("CT-001 - Cadastro com sucesso e login implicito")
     void devePreencherFluxoPrincipalDeCadastroDeUsuario() {
+        SignUpPage signup = navegarParaCadastro();
+
         String senha = UserFaker.password();
         signup.preencherUsername(UserFaker.username())
                 .preencherNickname(UserFaker.nickname())
@@ -77,7 +65,9 @@ public class SignUpUiTest {
 
     @Test
     @DisplayName("CT-002 - Password diferente da confirmacao")
-    void  devePreencherConfirmarSenhaComValorDiferenteDeSenha() {
+    void devePreencherConfirmarSenhaComValorDiferenteDeSenha() {
+        SignUpPage signup = navegarParaCadastro();
+
         signup.preencherUsername(UserFaker.username())
                 .preencherNickname(UserFaker.nickname())
                 .preencherEmail(UserFaker.email())
@@ -94,6 +84,8 @@ public class SignUpUiTest {
     @Test
     @DisplayName("CT-003 - Campos obrigatorios em branco mostram mensagens em sequencia")
     void deveExibirMensagensDeCamposObrigatoriosEmOrdem() {
+        SignUpPage signup = navegarParaCadastro();
+
         String senha = UserFaker.password();
 
         signup.clicarProximo();
@@ -120,6 +112,8 @@ public class SignUpUiTest {
     @Test
     @DisplayName("CT-005a - Cadastro via UI com username ja em uso exibe conflito")
     void deveExibirConflitoQuandoUsernameJaExiste() {
+        SignUpPage signup = navegarParaCadastro();
+
         RegisterRequest existente = UserFaker.randomRegister();
         auth.register(existente);
 
@@ -139,6 +133,8 @@ public class SignUpUiTest {
     @Test
     @DisplayName("CT-005b - Cadastro via UI com email ja em uso exibe conflito")
     void deveExibirConflitoQuandoEmailJaExiste() {
+        SignUpPage signup = navegarParaCadastro();
+
         RegisterRequest existente = UserFaker.randomRegister();
         auth.register(existente);
 
@@ -158,6 +154,8 @@ public class SignUpUiTest {
     @Test
     @DisplayName("CT-006 - Troca de idioma atualiza moeda e primeiro dia da semana")
     void deveAlterarMoedaEPrimeiroDiaAoAlterarAMoeda() {
+        SignUpPage signup = navegarParaCadastro();
+
         assertThat(signup.getTextoIdiomaSelecionado()).isEqualTo("Português (Brasil)");
         assertThat(signup.getTextoMoedaSelecionada()).isEqualTo("Real Brasileiro");
         assertThat(signup.getTextoPrimeiroDiaSelecionado()).isEqualTo("Segunda-feira");

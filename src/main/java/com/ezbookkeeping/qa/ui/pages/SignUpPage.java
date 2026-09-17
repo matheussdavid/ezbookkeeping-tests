@@ -36,7 +36,7 @@ public class SignUpPage extends BasePage{
     }
 
     public SignUpPage abrir() {
-        driver.get(AppConfig.UI_URL + "/desktop#/login");
+        driver.get(AppConfig.UI_URL + "/desktop#/signup");
         return this;
     }
 
