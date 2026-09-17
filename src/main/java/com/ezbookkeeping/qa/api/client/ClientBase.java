@@ -11,6 +11,7 @@ public abstract class ClientBase {
     protected RequestSpecification baseSpec() {
         return given()
                 .contentType(ContentType.JSON)
-                .header("X-Timezone-Name", AppConfig.DEFAULT_TIMEZONE);
+                .header("X-Timezone-Name", AppConfig.DEFAULT_TIMEZONE)
+                .auth().none();
     }
 }

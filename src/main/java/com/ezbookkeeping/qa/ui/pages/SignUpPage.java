@@ -108,7 +108,7 @@ public class SignUpPage extends BasePage{
             try {
                 clicar(opcaoComTexto(nomeOuCodigo));
                 return this;
-            } catch (TimeoutException | StaleElementReferenceException e) {
+            } catch (TimeoutException | StaleElementReferenceException | ElementNotInteractableException e) {
                 if (tentativa == 3) {
                     throw e;
                 }

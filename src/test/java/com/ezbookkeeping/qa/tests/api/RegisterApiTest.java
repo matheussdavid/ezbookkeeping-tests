@@ -16,6 +16,8 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Tag("api")
+@Execution(ExecutionMode.SAME_THREAD)
 public class RegisterApiTest extends TestBase {
 
     private final AuthClient auth = new AuthClient();
@@ -387,7 +390,7 @@ public class RegisterApiTest extends TestBase {
 
         String token = response.getResult().getToken();
         String categoriesBody = RestAssured.given()
-                .auth().oauth2(token)
+                .header("Authorization", "Bearer " + token)
                 .header("X-Timezone-Name", AppConfig.DEFAULT_TIMEZONE)
                 .when()
                 .get("/api/v1/transaction/categories/list.json")
@@ -397,7 +400,7 @@ public class RegisterApiTest extends TestBase {
                 .body()
                 .asString();
 
-        assertThat(categoriesBody).contains("Alimentacao", "Transporte", "Salario");
+        assertThat(categoriesBody).contains("Alimentação", "Transporte", "Salário");
     }
 
     @Test

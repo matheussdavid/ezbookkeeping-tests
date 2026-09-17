@@ -8,11 +8,14 @@ import com.ezbookkeeping.qa.fixtures.TestUsers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
 @Tag("api")
+@Execution(ExecutionMode.SAME_THREAD)
 public class AuthorizeApiTest extends TestBase {
 
     private final AuthClient auth = new AuthClient();

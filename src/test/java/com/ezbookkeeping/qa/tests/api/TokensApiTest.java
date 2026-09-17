@@ -12,7 +12,11 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+
 @Tag("api")
+@Execution(ExecutionMode.SAME_THREAD)
 public class TokensApiTest extends TestBase {
 
     private final AuthClient auth = new AuthClient();
