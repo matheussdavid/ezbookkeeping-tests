@@ -101,11 +101,10 @@ public class SignUpPage extends BasePage{
             WebElement campo = esperarClicavel(DROPDOWN_CURRENCY);
             WebElement input = campo.findElement(By.tagName("input"));
 
-            input.click();
-            input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
-            input.sendKeys(nomeOuCodigo);
-
             try {
+                input.click();
+                input.sendKeys(Keys.chord(Keys.CONTROL, "a"), Keys.DELETE);
+                input.sendKeys(nomeOuCodigo);
                 clicar(opcaoComTexto(nomeOuCodigo));
                 return this;
             } catch (TimeoutException | StaleElementReferenceException | ElementNotInteractableException e) {
